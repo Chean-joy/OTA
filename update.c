@@ -5,7 +5,7 @@
 #include "flash_drv.h"
 
 
-// ʵ�����������ݽ��գ���¼���̣�����ʵ�֣�
+// 实锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟捷斤拷锟秸ｏ拷锟斤拷录锟斤拷锟教ｏ拷锟斤拷锟斤拷实锟街ｏ拷
 #define YMODEM_PACKET_LENGTH  1024
 
 #define FILE_NAME_LENGTH 256
@@ -20,30 +20,30 @@
 #define PACKET_SIZE (128)
 #define PACKET_1K_SIZE (1024)
 
-#define SOH (0x01)   // 128�ֽ����ݰ���ʼ
-#define STX (0x02)   // 1024�ֽڵ����ݰ���ʼ
-#define EOT (0x04)   // ��������
-#define ACK (0x06)   // ��Ӧ
-#define NAK (0x15)   // �ջ�Ӧ
-#define CA (0x18)    // �����������ֹת��
-#define CREQ (0x43)  //'C' == 0x43, ��������
+#define SOH (0x01)   // 128锟街斤拷锟斤拷锟捷帮拷锟斤拷始
+#define STX (0x02)   // 1024锟街节碉拷锟斤拷锟捷帮拷锟斤拷始
+#define EOT (0x04)   // 锟斤拷锟斤拷锟斤拷锟斤拷
+#define ACK (0x06)   // 锟斤拷应
+#define NAK (0x15)   // 锟秸伙拷应
+#define CA (0x18)    // 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟街棺?锟斤拷
+#define CREQ (0x43)  //'C' == 0x43, 锟斤拷锟斤拷锟斤拷锟斤拷
 
-#define ABORT1 (0x41)  //'A' == 0x41, �û���ֹ
-#define ABORT2 (0x61)  //'a' == 0x61, �û���ֹ
+#define ABORT1 (0x41)  //'A' == 0x41, 锟矫伙拷锟斤拷止
+#define ABORT2 (0x61)  //'a' == 0x61, 锟矫伙拷锟斤拷止
 
-#define NAK_TIMEOUT (0x4fffff)
+#define NAK_TIMEOUT (0xffffff)
 #define MAX_ERRORS (65565)
 
 static uint8_t g_packetBuffer[YMODEM_PACKET_LENGTH];
 
-// �ļ���
+// 锟侥硷拷锟斤拷
 char g_imageName[FILE_NAME_LENGTH] = "abc.bin";
 
 
 /**********************************************************
- * @brief ��ȡ�ļ���Ϣ
- * @param packetData IN Ҫ����������
- * @param size OUT �ļ���С
+ * @brief 锟斤拷取锟侥硷拷锟斤拷息
+ * @param packetData IN 要锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+ * @param size OUT 锟侥硷拷锟斤拷小
  * @return
  **********************************************************/
 void getFileInfo(uint8_t *packetData, int32_t *size) {
@@ -51,91 +51,91 @@ void getFileInfo(uint8_t *packetData, int32_t *size) {
   uint8_t fileSize[FILE_SIZE_LENGTH];
 
   uint8_t *filePtr;
-  /* ����3���ֽڣ�ȡ���ļ�����ֱ������0x00(\0), Filename packet has valid data
+  /* 锟斤拷锟斤拷3锟斤拷锟街节ｏ拷取锟斤拷锟侥硷拷锟斤拷锟斤拷直锟斤拷锟斤拷锟斤拷0x00(\0), Filename packet has valid data
    */
   for (i = 0, filePtr = packetData + PACKET_HEADER; (*filePtr != '\0') && (i < FILE_NAME_LENGTH); ) {
     g_imageName[i++] = *filePtr++;
   }
   g_imageName[i++] = '\0';
 
-  /* ȡ�������ܳ��ȣ�ֱ���������ַ� */
+  /* 取锟斤拷锟斤拷锟斤拷锟杰筹拷锟饺ｏ拷直锟斤拷锟斤拷锟斤拷锟斤拷锟街凤拷 */
   for (i = 0, filePtr++; (*filePtr != ' ') && (i < FILE_SIZE_LENGTH);) {
     fileSize[i++] = *filePtr++;
   }
   fileSize[i++] = '\0';
-  // �������ַ���ת��int32_t��������
+  // 锟斤拷锟斤拷锟斤拷锟街凤拷锟斤拷转锟斤拷int32_t锟斤拷锟斤拷锟斤拷锟斤拷
   Str2Int(fileSize, size);
 }
 
 #define SendByte(byte)  USART0_send_byte(byte)
-char bufArr[128]; // ����־��
+char bufArr[128]; // 锟斤拷锟斤拷志锟斤拷
 
 /**********************************************************
- * @brief ����ʽ����һ����������, ����CRC����У��
- * @param data    �յ����ֽ�����
- * @param length  �յ������ݳ��� 128, 1024
- * @param timeout ��ʱʱ��
- * @return ������: 0�ɹ�, ����ʧ��
+ * @brief 锟斤拷锟斤拷式锟斤拷锟斤拷一锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷, 锟斤拷锟斤拷CRC锟斤拷锟斤拷校锟斤拷
+ * @param data    锟秸碉拷锟斤拷锟街斤拷锟斤拷锟斤拷
+ * @param length  锟秸碉拷锟斤拷锟斤拷锟捷筹拷锟斤拷 128, 1024
+ * @param timeout 锟斤拷时时锟斤拷
+ * @return 锟斤拷锟斤拷锟斤拷: 0锟缴癸拷, 锟斤拷锟斤拷失锟斤拷
  **********************************************************/
 int RecevicePacket(uint8_t* data, int32_t* length, uint32_t timeout){
 
-    uint32_t packageSize = 0; // ���ݰ���С
-    *length = 0; // һ��Ҫ�ѳ�������
+    uint32_t packageSize = 0; // 锟斤拷锟捷帮拷锟斤拷小
+    *length = 0; // 一锟斤拷要锟窖筹拷锟斤拷锟斤拷锟斤拷
     
-    uint8_t c;
+    uint8_t c = 0;
     
-    // ��ȡ��Ϣͷ
+    // 锟斤拷取锟斤拷息头
     if(USART0_ReceiveByteTimeout(&c, timeout)){
-        return -10; // ��ʱ
+        return -10; // 锟斤拷时
     }
     
-    // �ж���Ϣͷ
+    // 锟叫讹拷锟斤拷息头
     switch(c){
-        case SOH:  // 128�ֽ����ݰ���ʼ
+        case SOH:  // 128锟街斤拷锟斤拷锟捷帮拷锟斤拷始
             packageSize = 128;
             break;
-        case STX:  // 1024�ֽ����ݰ���ʼ
+        case STX:  // 1024锟街斤拷锟斤拷锟捷帮拷锟斤拷始
             packageSize = 1024;
             break;
-        case EOT:  // ��������
+        case EOT:  // 锟斤拷锟斤拷锟斤拷锟斤拷
             packageSize = 0;
             return 0;
-        case CA:  // 0x18, �����������ֹת��, �����յ�����0x18,˵���û�������Ctrl + C
+        case CA:  // 0x18, 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟街棺?锟斤拷, 锟斤拷锟斤拷锟秸碉拷锟斤拷锟斤拷0x18,说锟斤拷锟矫伙拷锟斤拷锟斤拷锟斤拷Ctrl + C
             if((!USART0_ReceiveByteTimeout(&c, timeout)) && c == CA){
-                return -11; // �û������жϷ���
+                return -11; // 锟矫伙拷锟斤拷锟斤拷锟叫断凤拷锟斤拷
             }else{
-                return -12; // �û������жϷ���
+                return -12; // 锟矫伙拷锟斤拷锟斤拷锟叫断凤拷锟斤拷
             }
-        case ABORT1:  // 'A' == 0x41, �û���ֹ
-        case ABORT2:  // 'a' == 0x61, �û���ֹ
-            return -13; // �û�������ֹ
-        default:  // �������
-            return -14; // �������
+        case ABORT1:  // 'A' == 0x41, 锟矫伙拷锟斤拷止
+        case ABORT2:  // 'a' == 0x61, 锟矫伙拷锟斤拷止
+            return -13; // 锟矫伙拷锟斤拷锟斤拷锟斤拷止
+        default:  // 锟斤拷锟斤拷锟斤拷锟?
+            return -14; // 锟斤拷锟斤拷锟斤拷锟?
     }
 
-    // ��֡ͷ�浽���ݰ���
+    // 锟斤拷帧头锟芥到锟斤拷锟捷帮拷锟斤拷
     data[0] = c;
-    // ѭ������N-1������
+    // 循锟斤拷锟斤拷锟斤拷N-1锟斤拷锟斤拷锟斤拷
     uint32_t packageTotal = packageSize + PACKET_OVERHEAD;
     for(int i = 1; i < packageTotal; i++){
         if(USART0_ReceiveByteTimeout(&data[i], timeout)){
-            return -15; // ��ʱ
+            return -15; // 锟斤拷时
         }
     }
 
-    // �������ݰ����, У�����кźͷ����к�
+    // 锟斤拷锟斤拷锟斤拷锟捷帮拷锟斤拷锟?, 校锟斤拷锟斤拷锟叫号和凤拷锟斤拷锟叫猴拷
     if((data[PACKET_SEQNO_INDEX] | data[PACKET_SEQNO_COMP_INDEX]) != 0xFF){
-        return -16; // ���кŻ����кŴ���
+        return -16; // 锟斤拷锟叫号伙拷锟斤拷锟叫号达拷锟斤拷
     }
 
-    // ����ʵ�ʵ�CRC16
+    // 锟斤拷锟斤拷实锟绞碉拷CRC16
     uint16_t expect_crc = (data[packageTotal - 2] << 8) | data[packageTotal - 1];
     uint16_t actual_crc = Crc16Ymodem(&data[3], packageSize);
     if(expect_crc != actual_crc){
-        return -17; // CRC16У��ʧ��
+        return -17; // CRC16校锟斤拷失锟斤拷
     }
 
-    // ���ݰ�У��ͨ��
+    // 锟斤拷锟捷帮拷校锟斤拷通锟斤拷
     *length = packageSize;
 
     return 0;
@@ -145,123 +145,287 @@ int RecevicePacket(uint8_t* data, int32_t* length, uint32_t timeout){
 // uint8_t packetData[1024 + 5] = {0};
 
 /**********************************************************
- * @brief ���ղ���¼�°汾�̼�
+ * @brief 锟斤拷锟秸诧拷锟斤拷录锟铰版本锟教硷拷
  * @param 
- * @return �̼���С>0, ������<0
+ * @return 锟教硷拷锟斤拷小>0, 锟斤拷锟斤拷锟斤拷<0
  **********************************************************/
 int32_t YmodemReceive(void){
-    // ׼���������ÿһ��������(���ջ��С̫��, ���ܻᵼ��ջ���)
-    // 1. ����ջ��С, 2. �����ַŵ�ȫ��
+//     // 准锟斤拷锟斤拷锟斤拷锟斤拷锟矫恳伙拷锟斤拷锟斤拷锟斤拷锟?(锟斤拷锟秸伙拷锟叫√?锟斤拷, 锟斤拷锟杰会导锟斤拷栈锟斤拷锟?)
+//     // 1. 锟斤拷锟斤拷栈锟斤拷小, 2. 锟斤拷锟斤拷锟街放碉拷全锟斤拷
+//     uint8_t packetData[YMODEM_PACKET_LENGTH + PACKET_OVERHEAD];
+//     // 锟斤拷锟捷帮拷锟斤拷锟斤拷锟斤拷Data锟斤拷锟斤拷
+//     int32_t packetLength = 0, packetsReceived = 0, fileSize = 0;
+//     uint8_t fileDone = 0; // 锟侥硷拷锟斤拷锟斤拷锟斤拷杀锟街?
+//     // 锟斤拷锟斤拷锟斤拷锟?, 锟斤拷录要写锟斤拷锟紽lash锟斤拷位锟斤拷
+//     uint32_t flashDestinaiton = APP_ADDR_IN_FLASH;
+    
+//     #ifdef MULTIPLE_FILE_TRANSFILE
+//     uint8_t sessonDone = 0; // 锟结话锟斤拷杀锟街?
+//     while(1)
+//     {
+//         flashDestinaiton = APP_ADDR_IN_FLASH;
+//         packetsReceived = 0;
+//         fileDone = 0;
+//     #endif
+
+//     // 锟斤拷锟斤拷式锟斤拷锟斤拷一锟斤拷锟侥硷拷锟侥讹拷锟斤拷锟斤拷莅锟?
+//     while(1){
+//         // 锟斤拷锟斤拷一锟斤拷锟斤拷锟捷帮拷
+//         int rst = RecevicePacket(packetData, &packetLength, NAK_TIMEOUT);
+        
+//         #if MULTIPLE_FILE_TRANSFILE
+//         if(rst == -13){ // 'A' 锟斤拷 'a', 锟矫伙拷锟斤拷止锟斤拷锟斤拷
+//             SendByte(CA);
+//             SendByte(CA);
+//             return -4;
+//         }else if(rst == -11 || rst == -12){ // 锟斤拷锟斤拷锟斤拷锟斤拷CA, 锟斤拷锟斤拷止锟斤拷锟斤拷, 说锟斤拷锟矫伙拷锟斤拷锟斤拷锟斤拷Ctrl+C
+//             SendByte(ACK);
+//             return -3;
+//         }
+//         #endif
+
+//         if(rst != 0){
+//             SendByte(CREQ);
+//             continue;
+//         }
+
+//         if(packetLength == 0){ // 锟斤拷锟斤拷锟斤拷锟斤拷EOT
+//             if(fileDone == 0){
+//                 fileDone = 1;
+//                 // 锟截革拷NAK
+//                 SendByte(NAK);
+//                 USART1_send_string("fileDone NAK\r\n");
+//             }else if(fileDone == 1){
+//                 
+//         #if MULTIPLE_FILE_TRANSFILE
+//
+//                  fileDone = 2;
+//                 // endif
+//                // 锟截革拷ACK
+//                 SendByte(ACK);
+//                 USART1_send_string("fileDone ACK!!!\r\n");
+//                 // 锟侥硷拷锟斤拷锟斤拷锟斤拷锟?
+//                 break;
+//             }
+//             continue;
+//         }
+        
+//         // 锟秸碉拷锟斤拷锟斤拷锟捷帮拷锟斤拷通锟斤拷锟斤拷校锟斤拷 --------------------------------------
+// //        USART0_send_string("success\r\n");
+        
+//         if(packetsReceived == 0){ // 锟斤拷一锟斤拷锟斤拷: 锟侥硷拷锟斤拷0x00锟侥硷拷锟斤拷小锟斤拷息
+//             #ifdef MULTIPLE_FILE_TRANSFILE
+//             // 锟叫讹拷锟侥硷拷锟斤拷锟斤拷锟街斤拷, 锟角凤拷锟斤拷0x00                
+//             if(packetData[PACKET_HEADER] == 0x00){
+//                 // 锟斤拷锟斤拷锟?0x00锟斤拷峄帮拷锟斤拷锟?
+//                 SendByte(ACK);
+                
+//                 // 锟斤拷锟斤拷锟结话锟斤拷锟斤拷锟斤拷!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//                 sessonDone = 1;
+//                 break;
+//             }
+//             #endif
+
+
+//             // 锟斤拷取锟侥硷拷锟斤拷锟斤拷锟侥硷拷锟斤拷小
+//             getFileInfo(packetData, &fileSize);
+            
+//             sprintf(bufArr, "name: %s size->%d\r\n", g_imageName, fileSize);
+//             USART1_send_string(bufArr);
+            
+            
+//             // 准锟斤拷锟秸硷拷: 锟斤拷锟节猴拷锟叫达拷锟斤拷莸锟紽lash
+//             if(fileSize > FLASH_APP_SIZE){ // 锟教硷拷太锟斤拷
+//                 // 取锟斤拷锟斤拷锟斤拷
+//                 SendByte(CA);
+//                 SendByte(CA);
+//                 return -1;
+//             }
+            
+//             // 锟斤拷锟叫空硷拷锟斤拷锟?
+//             FlashErase(flashDestinaiton, fileSize);
+            
+//             // 锟截革拷ACK锟斤拷C
+//             SendByte(ACK);
+//             SendByte(CREQ);
+                
+//         }else { // 锟斤拷锟斤拷锟斤拷: 锟斤拷锟斤拷锟斤拷锟斤拷
+            
+//             // 锟斤拷锟斤拷锟斤拷写锟诫到Flash
+//             // 1. 锟斤拷packetData锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟捷匡拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷g_packetBuffer
+//             memcpy(g_packetBuffer, packetData + PACKET_HEADER, packetLength);
+//             // 2. 锟窖伙拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷写锟诫到Flash
+//             FlashWrite(flashDestinaiton, g_packetBuffer, packetLength);
+//             // 3. 锟斤拷锟斤拷要写锟斤拷锟轿伙拷锟?
+//             flashDestinaiton += packetLength;
+            
+//             // 锟截革拷ACK
+//             SendByte(ACK);
+            
+//             sprintf(bufArr, "packetLength: size->%d\r\n", packetLength);
+//             USART1_send_string(bufArr);                
+//         }   
+//         packetsReceived++;
+//     }
+//     #ifdef  MULTIPLE_FILE_TRANSFILE
+//         if(sessonDone >0){
+//             break;
+//         }
+//     }
+//     #endif
+//     return fileSize;
+
+
+    // 准锟斤拷锟斤拷锟斤拷锟斤拷锟矫恳伙拷锟斤拷锟斤拷锟斤拷锟?(锟斤拷锟秸伙拷锟叫√?锟斤拷, 锟斤拷锟杰会导锟斤拷栈锟斤拷锟?)
+    // 1. 锟斤拷锟斤拷栈锟斤拷小, 2. 锟斤拷锟斤拷锟街放碉拷全锟斤拷
     uint8_t packetData[YMODEM_PACKET_LENGTH + PACKET_OVERHEAD];
-    // ���ݰ�������Data����
+    // 锟斤拷锟捷帮拷锟斤拷锟斤拷锟斤拷Data锟斤拷锟斤拷
     int32_t packetLength = 0, packetsReceived = 0, fileSize = 0;
-    uint8_t fileDone = 0; // �ļ�������ɱ�־
-    // �������, ��¼Ҫд���Flash��λ��
+    uint8_t fileDone = 0, sessonDone = 0; // 锟侥硷拷锟斤拷锟斤拷锟斤拷杀锟街?
+    // 锟斤拷锟斤拷锟斤拷锟?, 锟斤拷录要写锟斤拷锟紽lash锟斤拷位锟斤拷
     uint32_t flashDestinaiton = APP_ADDR_IN_FLASH;
     
-    // ����ʽ����һ���ļ��Ķ�����ݰ�
+    // 锟斤拷锟斤拷式锟斤拷锟斤拷一锟斤拷锟结话锟侥讹拷锟斤拷募锟?
     while(1){
-        // ����һ�����ݰ�
-        int rst = RecevicePacket(packetData, &packetLength, NAK_TIMEOUT);
+        // 锟斤拷锟斤拷目锟疥开始位锟斤拷
+        flashDestinaiton = APP_ADDR_IN_FLASH;
         
-//        sprintf(bufArr, "rst->%d\r\n", rst);
-//        USART1_send_string(bufArr);
-        // ���rst����0, �쳣, ���·�������
-        if(rst != 0){
-            SendByte(CREQ);
-            continue;
-        }
-
-        if(packetLength == 0){ // ��������EOT
-            if(fileDone == 0){
-                fileDone = 1;
-                // �ظ�NAK
-                SendByte(NAK);
-                USART1_send_string("fileDone NAK\r\n");
-            }else if(fileDone == 1){
-                // �ظ�ACK
+        // 锟斤拷始锟斤拷一锟斤拷锟侥硷拷锟斤拷锟斤拷锟斤拷锟截诧拷锟斤拷
+        packetsReceived = 0, fileDone = 0;
+        
+        // 锟斤拷锟斤拷式锟斤拷锟斤拷一锟斤拷锟侥硷拷锟侥讹拷锟斤拷锟斤拷莅锟?
+        while(1){
+            // 锟斤拷锟斤拷一锟斤拷锟斤拷锟捷帮拷
+            int rst = RecevicePacket(packetData, &packetLength, NAK_TIMEOUT);
+            
+//            sprintf(bufArr, "rst->%d\r\n", rst);
+//            USART1_send_string(bufArr);
+            
+            // 锟斤拷锟斤拷锟届常锟斤拷锟斤拷锟斤拷锟? ------------------------------------------------
+            if(rst == -13){ // 'A' 锟斤拷 'a', 锟矫伙拷锟斤拷止锟斤拷锟斤拷
+                SendByte(CA);
+                SendByte(CA);
+                return -4;
+            }else if(rst == -11 || rst == -12){ // 锟斤拷锟斤拷锟斤拷锟斤拷CA, 锟斤拷锟斤拷止锟斤拷锟斤拷, 说锟斤拷锟矫伙拷锟斤拷锟斤拷锟斤拷Ctrl+C
                 SendByte(ACK);
-                USART1_send_string("fileDone ACK!!!\r\n");
-                // �ļ��������
-                break;
-            }
-            continue;
-        }
-        
-        // �յ������ݰ���ͨ����У�� --------------------------------------
-//        USART0_send_string("success\r\n");
-        
-        if(packetsReceived == 0){ // ��һ����: �ļ���0x00�ļ���С��Ϣ
-            
-            // ��ȡ�ļ������ļ���С
-            getFileInfo(packetData, &fileSize);
-            
-            sprintf(bufArr, "name: %s size->%d\r\n", g_imageName, fileSize);
-            USART1_send_string(bufArr);
-            
-            
-            // ׼���ռ�: ���ں��д���ݵ�Flash
-            if(fileSize > FLASH_APP_SIZE){ // �̼�̫��
-                // ȡ������
-                SendByte(CA);
-                SendByte(CA);
-                return -1;
+                return -3;
             }
             
-            // ���пռ����
-            FlashErase(flashDestinaiton, fileSize);
+            // 锟斤拷锟絩st锟斤拷锟斤拷0, 锟届常, 锟斤拷锟铰凤拷锟斤拷锟斤拷锟斤拷
+            if(rst != 0){
+                // 'C' when waiting for the filename packet, NAK when mid-transfer
+                SendByte(packetsReceived == 0 ? CREQ : NAK);
+                continue;
+            }
             
-            // �ظ�ACK��C
-            SendByte(ACK);
-            SendByte(CREQ);
+            if(packetLength == 0){ // 锟斤拷锟斤拷锟斤拷锟斤拷
+                if(fileDone == 0){
+                    fileDone = 1;
+                    // 锟截革拷NAK
+                    SendByte(NAK);
+                    USART1_send_string("fileDone NAK\r\n");
+                }else if(fileDone == 1){
+                    fileDone = 2;
+                    // 锟截革拷ACK
+                    SendByte(ACK);
+                    USART1_send_string("fileDone ACK!!!\r\n");
+                    // 锟侥硷拷锟斤拷锟斤拷锟斤拷锟? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    break;
+                }
+                continue;
+            }
+            
+            // 锟秸碉拷锟斤拷锟斤拷锟捷帮拷锟斤拷通锟斤拷锟斤拷校锟斤拷 -------------------------------------
+    //        USART0_send_string("success\r\n");
+            
+            if(packetsReceived == 0){ // 锟斤拷一锟斤拷锟斤拷: 锟侥硷拷锟斤拷0x00锟侥硷拷锟斤拷小锟斤拷息
                 
-        }else { // ������: ��������
+                // 锟叫讹拷锟侥硷拷锟斤拷锟斤拷锟街斤拷, 锟角凤拷锟斤拷0x00                
+                if(packetData[PACKET_HEADER] == 0x00){
+                    // 锟斤拷锟斤拷锟?0x00锟斤拷峄帮拷锟斤拷锟?
+                    SendByte(ACK);
+                    
+                    // 锟斤拷锟斤拷锟结话锟斤拷锟斤拷锟斤拷!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    sessonDone = 1;
+                    break;
+                }
+                
+                
+                // 锟斤拷取锟侥硷拷锟斤拷锟斤拷锟侥硷拷锟斤拷小
+                getFileInfo(packetData, &fileSize);
+                
+                sprintf(bufArr, "name: %s size->%d\r\n", g_imageName, fileSize);
+                USART1_send_string(bufArr);
+                
+                
+                // 准锟斤拷锟秸硷拷: 锟斤拷锟节猴拷锟叫达拷锟斤拷莸锟紽lash
+                if(fileSize > FLASH_APP_SIZE){ // 锟教硷拷太锟斤拷
+                    // 取锟斤拷锟斤拷锟斤拷
+                    SendByte(CA);
+                    SendByte(CA);
+                    return -1;
+                }
+                
+                // 锟斤拷锟叫空硷拷锟斤拷锟?
+                FlashErase(flashDestinaiton, fileSize);
+                
+                // 锟截革拷ACK锟斤拷C
+                SendByte(ACK);
+                SendByte(CREQ);
+                    
+            }else { // 锟斤拷锟斤拷锟斤拷: 锟斤拷锟斤拷锟斤拷锟斤拷
+                
+                // 锟斤拷锟斤拷锟斤拷写锟诫到Flash
+                // 1. 锟斤拷packetData锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟捷匡拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷g_packetBuffer
+                memcpy(g_packetBuffer, packetData + PACKET_HEADER, packetLength);
+                // 2. 锟窖伙拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷写锟诫到Flash
+                FlashWrite(flashDestinaiton, g_packetBuffer, packetLength);
+                // 3. 锟斤拷锟斤拷要写锟斤拷锟轿伙拷锟?
+                flashDestinaiton += packetLength;
+                
+                // 锟截革拷ACK
+                SendByte(ACK);
+                
+                sprintf(bufArr, "packetLength: size->%d\r\n", packetLength);
+                USART1_send_string(bufArr);                
+            }
             
-            // ������д�뵽Flash
-            // 1. ��packetData�����������ݿ�����������g_packetBuffer
-            memcpy(g_packetBuffer, packetData + PACKET_HEADER, packetLength);
-            // 2. �ѻ�����������д�뵽Flash
-            FlashWrite(flashDestinaiton, g_packetBuffer, packetLength);
-            // 3. ����Ҫд���λ��
-            flashDestinaiton += packetLength;
-            
-            // �ظ�ACK
-            SendByte(ACK);
-            
-            sprintf(bufArr, "packetLength: size->%d\r\n", packetLength);
-            USART1_send_string(bufArr);                
+            packetsReceived++;
+        }
+    
+        if(sessonDone > 0){
+            break;
         }
         
-        packetsReceived++;
     }
+    
     return fileSize;
 }
-
 void UpdateApp(){
     int32_t imageSize = 0;
 
-    // ����ʽѭ�������°汾�̼�
-    printf("�ȴ��ļ�����...(������ĸ'a'�жϴ���abort)\r\n");
+    // 阻塞式循环下载新版本固件
+    printf("等待文件传输...(按下字母'a'中断传输abort)\n");
 
-    // ͨ��YmodemЭ����չ̼�����¼
+    // 通过Ymodem协议接收固件并烧录
     imageSize = YmodemReceive();
     
-    // ��Ҫ�ȴ�һ���, ����SecureCRT����������ʾ������־
-//    DelayNms(100);
-		delay_ms(100);
+    // 需要等待一会儿, 否则SecureCRT不能正常显示如下日志
+    delay_ms(100);
     
     if(imageSize > 0) {
-        printf("��¼�ɹ�[ Name: %s ,imageSize: %d Bytes]\r\n", g_imageName, imageSize);
+        printf("烧录成功[ Name: %s ,imageSize: %d Bytes]\r\n", g_imageName, imageSize);
     } else if (imageSize == -1) {
-        printf("�̼����󣬳������ÿռ䣬�޷�����\r\n");
+        printf("固件过大，超出可用空间，无法下载\r\n");
     } else if (imageSize == -2) {
-        printf("�̼�У��ʧ��\r\n");
+        printf("固件校验失败\r\n");
     } else if (imageSize == -3) {
-        printf("�û������жϷ���\r\n"); // Ctrl + C
+        printf("用户主动中断发送\r\n"); // Ctrl + C
     } else if (imageSize == -4) {
-        printf("�û�����ȡ��abort\r\n"); // a A
+        printf("用户主动取消abort\r\n"); // a A
     } else {
-        printf("�����ļ�ʧ��code: %d \r\n", imageSize);
+        printf("接收文件失败code: %d \r\n", imageSize);
     }
 
 }
+

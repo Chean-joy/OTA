@@ -12,6 +12,8 @@
 // App�Ŀ��ÿռ�
 #define FLASH_APP_SIZE      (FLASH_SIZE - (APP_ADDR_IN_FLASH - FLASH_BASE))
 
+#define MULTIPLE_FILE_TRANSFILE 1
+
 void UpdateApp(void);
 
 

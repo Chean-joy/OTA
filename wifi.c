@@ -7,6 +7,9 @@
 #define WIFI_SSID "iPhone13Pro"
 #define WIFI_PASSWORD "chean666"
 
+
+
+
 #define OTA_VERSION_CHEACK_URL "AT+HTTPCLIENT=2,0,\"http://iot-api.heclouds.com/fuse-ota/oN0s560311/device003/check?\
 type=1&version=1.0\",\"\",\"\",1,\"Authorization: version=2018-10-31&res=products%2FH14gVsQnXZ&et=2011523689&method=md5&sign=EWBvCjrXulhL5P8AFyUUhQ%3D%3D\"\r\n"
 

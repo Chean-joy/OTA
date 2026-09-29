@@ -12,20 +12,20 @@ start										  total
 
 Flash存储方案
 Sector	0             1	                      234567
-	  Bootloader	Param					  APP_SIZE
-|---------------|------------|------------------------------------------------|
-	   16K    		 16K		               480K
+	  Bootloader	Param					  APP_SIZE1                     APP_SIZE2
+|---------------|------------|-------------------|----------------------------|
+	   32K    		 16K		               208K                  256K
 UPDATE PARAM->0xABCD
 */
 #define FLASH_SIZE                        0x80000
-#define BOOTLOADER_SIZE                   (16 * 1024)       // 0x4000
+#define BOOTLOADER_SIZE                   (32 * 1024)       // 0x8000
 #define PARAMETER_SIZE                    (16 * 1024)       // 0x4000
 
-#define PARAM_ADDR_IN_FLASH            	  (0x08000000 + BOOTLOADER_SIZE)					// 0x8004000
-#define APP_ADDR_IN_FLASH                 (0x08000000 + BOOTLOADER_SIZE + PARAMETER_SIZE)	// 0x8008000
+#define PARAM_ADDR_IN_FLASH            	  (0x08000000 + BOOTLOADER_SIZE)					// 0x8008000
+#define APP_ADDR_IN_FLASH                 (0x08000000 + BOOTLOADER_SIZE + PARAMETER_SIZE)	// 0x800C000
 
 #define NEED_UPDATE_VERSION_FLAG          0xABCD
-#define VECTOR_OFFSET                     (BOOTLOADER_SIZE + PARAMETER_SIZE) // 0x8000
+#define VECTOR_OFFSET                     (BOOTLOADER_SIZE + PARAMETER_SIZE) // 0xC000
 
 // 给App用
 bool SetUpdateVerFlag(void);   // 设置升级标记

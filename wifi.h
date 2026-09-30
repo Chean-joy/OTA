@@ -2,7 +2,7 @@
 #define __WIFI_H__
 
 #include "usart.h"
-
+#include "store_app.h"
 
 // 假设你有一个用于存储 OTA 信息的结构体或全局变量
 typedef struct {
@@ -13,9 +13,7 @@ typedef struct {
 } ota_info_t;
 
 
-#define CPU_FREQ_MHZ  120
-// NOP延时函数，单位为微秒
-void nop_delay_us(uint32_t us);
+extern ota_info_t current_ota_info;
 
 uint8_t Wifi_init(void);
 
@@ -23,9 +21,9 @@ uint8_t Wifi_check_OTA_Version(void);
 
 uint8_t Wifi_connect(void);
 
+uint8_t Wifi_DOWNLOAD_OTA_Version(void);
 
-
-
+uint8_t Wifi_STATUS_OTA_POST(const char *command);
 
 #endif
 

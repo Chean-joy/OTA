@@ -1,7 +1,3 @@
-//该程序用于bootloader层
-
-
-
 /************************************************
  GenBotter Mini GD32������
  Template����ģ��-�½�����ʹ��
@@ -15,13 +11,16 @@
 #include <stdio.h>
 #include "store_app.h"
 
-
+#include "oled.h"
+#include "key01.h"
+#include "wifi.h"
 #define RAM_START_ADDR 0x20000000
 #define RAM_SIZE 0x020000
 
 
 #define IAP_BOOTLOADER_MODE1_DEFT 0
-#define IAP_BOOTLOADER_MODE2 1
+#define IAP_BOOTLOADER_MODE2 0
+#define OTA_BOOTLOADER_MODE 1
 
 #define BOOT_DELAY_COUNT 16
 
@@ -32,7 +31,7 @@ typedef void (*FuncPtr)(void);
 
 void BoottoApp(void)
 {
-	//去除0x8008000地址里的栈顶地址 (例如:0x20000000) 0x20000000~0x20000000+RAM_SIZE
+	//获取0x800C000地址里的栈顶地址 (例如:0x20000000) 0x20000000~0x20000000+RAM_SIZE
 	uint32_t stackTopAddr = *((__IO uint32_t *)APP_ADDR_IN_FLASH);
 	//确定栈顶地址在合法范围内
 	printf("stackTopAddr:%08x\r\n",stackTopAddr);
@@ -42,7 +41,7 @@ void BoottoApp(void)
 		__disable_irq();
 		//设置新的栈顶地址 到SP寄存器(MAP)
 		__set_MSP(stackTopAddr);
-		//取出0x08008004地址的重置函数地址 Reset_Handler
+		//取出0x0800C004地址的重置函数地址 Reset_Handler
 		uint32_t resetHandlerAddr = *((__IO uint32_t *)(APP_ADDR_IN_FLASH + 4));
         printf("resetHandlerAddr: 0x%08X\n", resetHandlerAddr);
 		//把函数地址转成 指向函数的指针,用来跳转APP
@@ -162,11 +161,112 @@ int main(void)
 		
 		main_menu_cmd();
 		
+#elif OTA_BOOTLOADER_MODE		
+		//OTA任务
+		delay_init(120);                     //��ʼ����ʱ���� 
+	  	
+		usart_init(115200);											//��ʼ������
+	
+		usart1_init(115200);
+
+		printf("Hello World\r\n");
+	
+		printf("Test......\r\n");
+		
+		key_01_init();
+		
+		OLED_Init();
+	
+		OLED_Clear(1);
+	
+		OLED_ShowString(0,0,"BOOTLOAD",12,1);
+	
+		OLED_Refresh();
+		
+		if(CheckNeedUpdate()) //确实检测到了OTA升级
+		{
+//			//
+			printf("OTA_NAME:%s,%d,%d\n",OTA_NAME,OTA_TID,OTA_SIZE);
+			
+			OLED_ShowString(0,12,"UPDATE EVENT!",12,1);
+			OLED_ShowString(0,24,"PRESS WAIT TIME:",12,1);
+			
+			OLED_Refresh();
+			
+			for(uint8_t i = 0;i <10; i++)
+			{
+				
+				if(i == 0) OLED_ShowNum(100,24,(10 - i),2,12,1);
+				else OLED_ShowNum(100,24,(10 - i),2,12,1);
+				
+				OLED_Refresh();
+				
+				delay_ms(1000);
+				
+				if(key_val)
+				{
+					key_val = 0;
+					printf("PRESS\n");
+					
+					OLED_ShowString(0,36,"START UPDATE!",12,1);
+					
+					OLED_Refresh();
+					//开始下载数据
+			
+			   if(Wifi_DOWNLOAD_OTA_Version())
+				 {
+					 //进行OTA状态上报
+					 uint8_t res =  Wifi_STATUS_OTA_POST();
+					 
+					 if(!res)
+					 {
+						 printf("POST SUCCESS!!!\n");
+					 }
+					 else printf("POST ERROR!!!\n");
+				 
+					 printf("OTA固件下载固件SUCCESS\n");
+				 }
+				 else
+				 {
+					 printf("OTA固件下载固件FAIL\n");
+				 }
+				 ClearUpdateVerFlag();//清理标志位区
+				 
+				 printf("FLAG FLASH COMPLATE FINISH!!!\n");
+				 
+				 OLED_ShowString(0,48,"DOWNLOAD FINISH!",12,1);
+					
+					OLED_Refresh();
+				 
+				 break;
+				}
+			}
+			
+			BoottoApp();
+		}
+		else
+		{
+			OLED_ShowString(0,12,"NO UPDATE EVENT!",12,1);
+			OLED_ShowString(0,24,"GO TO APP TIME:",12,1);
+			for(uint8_t i = 0;i <10; i++)
+			{
+				
+				if(i == 0) OLED_ShowNum(100,24,(10 - i),2,12,1);
+				else OLED_ShowNum(100,24,(10 - i),2,12,1);
+				
+				OLED_Refresh();
+				
+				delay_ms(1000);	
+			}
+			BoottoApp();
+		}
+		
 #endif
 		
 		
-    while(1)
+   while(1)
 	{
+		
 		
 	}
 }

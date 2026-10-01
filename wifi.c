@@ -15,13 +15,13 @@ type=1&version=1.0\",\"\",\"\",1,\"Authorization: version=2018-10-31&res=product
 
 #define TOKEN "version=2018-10-31&res=products%2FH14gVsQnXZ&et=2011523689&method=md5&sign=EWBvCjrXulhL5P8AFyUUhQ%3D%3D"
 
-#define OTA_STATUS_POST_URL200 \
+#define OTA_STATUS_POST_URL101 \
     "AT+HTTPCLIENT=3,1," \
     "\"https://iot-api.heclouds.com/fuse-ota/oN0s560311/device002/1372950/status\"," \
     "\"\"," \
     "\"\"," \
     "2," \
-    "\"{\\\"step\\\":200}\"," \
+    "\"{\\\"step\\\":101}\"," \
     "\"Authorization: version=2018-10-31&res=products%2FoN0s560311&et=1810052414&method=md5&sign=fanGm12AsIKpJ%2BfgQhWh3Q%3D%3D\"" \
     "\r\n"
 #define OTA_STATUS_POST_URL201 \
@@ -390,6 +390,8 @@ uint8_t Wifi_DOWNLOAD_OTA_Version(void)
 			printf("clear flash ERROR!!!\n");
 		}
 	
+			
+		
     for (uint16_t i = 0; i < count; i++)
     {
 //        uint32_t start = i * 200;
@@ -444,14 +446,19 @@ uint8_t Wifi_DOWNLOAD_OTA_Version(void)
 				if (!WriteintoFLASHData(APP_ADDR_BUFF_IN_FLASH + write_offset, bin_buffer, bin_len)) {
     printf("Flash write FAILED at offset %u, len %u\r\n", write_offset, bin_len);
     return 0;
-}
-				
+					}
+
 				/* 写入 Flash（后面再加） */
         write_offset += bin_len;
 				
         /* 在两次请求之间给 ESP 喘息时间 */
         delay_ms(600);
     }
+		
+		
+		//下载完成
+		Wifi_STATUS_OTA_POST(OTA_STATUS_POST_URL101);
+		
 
     printf("download done, total %u bytes\r\n", write_offset);
     
@@ -462,6 +469,10 @@ uint8_t Wifi_DOWNLOAD_OTA_Version(void)
 			
 		}
 			
+		
+		//升级成功
+		Wifi_STATUS_OTA_POST(OTA_STATUS_POST_URL201);
+		
 		return 1;
 }
 

@@ -216,13 +216,6 @@ int main(void)
 			   if(Wifi_DOWNLOAD_OTA_Version())
 				 {
 					 //进行OTA状态上报
-					 uint8_t res =  Wifi_STATUS_OTA_POST();
-					 
-					 if(!res)
-					 {
-						 printf("POST SUCCESS!!!\n");
-					 }
-					 else printf("POST ERROR!!!\n");
 				 
 					 printf("OTA固件下载固件SUCCESS\n");
 				 }
